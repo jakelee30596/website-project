@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Penentuan Jalur Terpendek</title>
+    <style>
+        body {
+            background-color: #9370DB; /* Warna ungu */
+            color: white; /* Mengubah warna teks menjadi putih agar kontras dengan background ungu */
+        }
+    </style>
+</head>
+<body>
+    <h1>Hasil Penentuan Jalur Terpendek</h1>
+    <!-- Use JavaScript to get query parameters from URL and display them -->
+    <p id="jalur"></p>
+    <p id="bobot"></p>
+    <a href="/">Kembali</a>
+
+    <script>
+        // Dapatkan data jalur dan bobot dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const jalur = urlParams.get('jalur');
+        const bobot = urlParams.get('bobot');
+
+        // Masukkan data ke dalam elemen HTML
+        document.getElementById('jalur').innerText = 'Jalur terpendek: ' + jalur;
+        document.getElementById('bobot').innerText = 'Bobot: ' + bobot + ' km';
+    </script>
+</body>
+</html>
