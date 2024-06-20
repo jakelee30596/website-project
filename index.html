@@ -153,10 +153,10 @@
                     let simpul_asal = jalur[i];
                     let simpul_tujuan = jalur[i + 1];
                     let jarak = graf[simpul_asal][simpul_tujuan];
-                    hasil.push(${simpul_asal} -> ${simpul_tujuan} : ${jarak});
+                    hasil.push(`${simpul_asal} -> ${simpul_tujuan} : ${jarak}`);
                     total_jarak += jarak;
                 }
-                hasil.push(Total jarak: ${total_jarak.toFixed(2)});
+                hasil.push(`Total jarak: ${total_jarak.toFixed(2)}`);
                 return hasil;
             }
         }
