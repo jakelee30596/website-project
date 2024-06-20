@@ -1,84 +1,247 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penentuan Jalur Terpendek</title>
+    <title>Program Algoritma Djikstra Dalam Mencari Jalur Terpendek Kelompok 7</title>
     <style>
         body {
-            background-color: #9370DB; /* Warna ungu */
+            font-family: Arial, sans-serif;
+            background-color: #800080; /* Warna ungu */
+            margin: 0;
+            padding: 0;
+            color: #fff; /* Warna teks putih */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
-        /* Styling untuk modal */
-        .modal {
-            display: none; /* Modal defaultnya tersembunyi */
-            position: fixed; /* Tetap di tempat bahkan saat gulir */
-            z-index: 1; /* Di atas semua elemen */
-            left: 0;
-            top: 0;
-            width: 100%; /* Lebar penuh */
-            height: 100%; /* Tinggi penuh */
-            overflow: auto; /* Memungkinkan guliran jika diperlukan */
-            background-color: rgba(0,0,0,0.9); /* Warna latar belakang semi-transparan */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .modal-content {
-            margin: 15% auto; /* Posisi tengah vertikal */
+        header h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+        #pembungkus {
+            width: 90%;
+            max-width: 400px;
             padding: 20px;
-            width: 80%; /* Lebar konten */
-            max-width: 600px; /* Lebar maksimum */
-            background-color: #fefefe;
-            border: 1px solid #888;
-            border-radius: 8px;
+            background-color: #4B0082; /* Warna ungu tua */
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
+        form label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
         }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
+        form input {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+        }
+        form .button {
+            width: 100%;
+            padding: 10px;
+            background-color: #32CD32; /* Warna hijau */
+            color: #fff;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
+        }
+        form .button:hover {
+            background-color: #228B22; /* Warna hijau gelap */
+        }
+        #hasilJalurDijkstra {
+            width: 100%;
+            height: 150px;
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #FFF; /* Warna latar textarea putih */
+            color: #000; /* Warna teks hitam */
+            resize: none;
         }
     </style>
 </head>
 <body>
-    <h1>Penentuan Jalur Terpendek</h1>
-    <button id="openModal">Lihat Graf</button> <!-- Tombol untuk membuka modal -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span> <!-- Tombol untuk menutup modal -->
-            <!-- Change the src attribute to the actual path of your image -->
-            <img src="graf.png" alt="Graf Velangkanni">
-        </div>
+
+    <header>
+        <h1>Program Algoritma Djikstra Dalam Mencari Jalur Terpendek</h1>
+        <p>Kelompok 7-PSM 22B</p>
+    </header>
+
+    <div id="pembungkus">
+        <form method="post" name="formDijkstra" onsubmit="findShortestPath(); return false;">
+            <label>Masukkan Simpul Awal</label>
+            <input type="text" name="startNode" placeholder="Start Node" required>
+
+            <label>Masukkan Simpul Akhir</label>
+            <input type="text" name="endNode" placeholder="End Node" required>
+
+            <button type="submit" class="button">Cari Jalur Terpendek</button>
+        </form>
+        <textarea id="hasilJalurDijkstra" readonly placeholder="Hasil Jalur dan Jarak Terpendek"></textarea>
     </div>
-    <form id="form" action="/result" method="get"> <!-- Use GET method to pass data via URL -->
-        <label for="start">Simpul Awal:</label>
-        <input type="text" id="start" name="start"><br><br>
-        <label for="end">Simpul Akhir:</label>
-        <input type="text" id="end" name="end"><br><br>
-        <input type="submit" value="Cari Jalur">
-    </form>
 
     <script>
-        // JavaScript untuk menangani tindakan klik pada tombol dan menampilkan/menyembunyikan modal
-        var modal = document.getElementById("myModal");
-        var btn = document.getElementById("openModal");
-        var span = document.getElementsByClassName("close")[0];
-
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
+        class Dijkstra {
+            constructor(simpul, graf) {
+                this.simpul = simpul;
+                this.graf = graf;
             }
+
+            mencari_rute(start, end) {
+                let unvisited_simpul = {};
+                for (let n of this.simpul) {
+                    unvisited_simpul[n] = Infinity;
+                }
+                unvisited_simpul[start] = 0;
+
+                let visited_simpul = {};
+                let parents = {};
+
+                while (Object.keys(unvisited_simpul).length > 0) {
+                    let min_vertex = Object.keys(unvisited_simpul).reduce((a, b) => unvisited_simpul[a] < unvisited_simpul[b] ? a : b);
+
+                    if (min_vertex === end) {
+                        visited_simpul[min_vertex] = unvisited_simpul[min_vertex];
+                        break;
+                    }
+
+                    for (let [neighbour, weight] of Object.entries(this.graf[min_vertex] || {})) {
+                        if (neighbour in visited_simpul) {
+                            continue;
+                        }
+
+                        let jalur_baru = unvisited_simpul[min_vertex] + weight;
+                        if (jalur_baru < unvisited_simpul[neighbour]) {
+                            unvisited_simpul[neighbour] = jalur_baru;
+                            parents[neighbour] = min_vertex;
+                        }
+                    }
+
+                    visited_simpul[min_vertex] = unvisited_simpul[min_vertex];
+                    delete unvisited_simpul[min_vertex];
+                }
+
+                return [parents, visited_simpul];
+            }
+
+            static jalur_dilewati(parents, start, end) {
+                let jalur = [end];
+                while (true) {
+                    let key = parents[jalur[0]];
+                    jalur.unshift(key);
+                    if (key === start) {
+                        break;
+                    }
+                }
+                return jalur;
+            }
+
+            static cetak_jalur_dan_jarak(jalur, graf) {
+                let total_jarak = 0;
+                let hasil = [];
+                for (let i = 0; i < jalur.length - 1; i++) {
+                    let simpul_asal = jalur[i];
+                    let simpul_tujuan = jalur[i + 1];
+                    let jarak = graf[simpul_asal][simpul_tujuan];
+                    hasil.push(${simpul_asal} -> ${simpul_tujuan} : ${jarak});
+                    total_jarak += jarak;
+                }
+                hasil.push(Total jarak: ${total_jarak.toFixed(2)});
+                return hasil;
+            }
+        }
+
+        const input_simpul = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                             'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'BB', 'CC', 'DD', 'EE',
+                             'FF', 'GG', 'HH', 'II', 'JJ', 'KK', 'LL', 'MM', 'NN', 'OO', 'PP', 'QQ', 'RR',
+                             'SS', 'TT', 'UU', 'VV', 'WW', 'XX', 'YY', 'ZZ', 'AAA', 'BBB', 'CCC', 'DDD', 'EEE',
+                             'FFF', 'GGG', 'HHH', 'III', 'JJJ'];
+
+        const input_graf = {
+            'A': {'B': 0.452},
+              'B': {'A': 0.452, 'C': 0.261, 'G': 0.417},
+              'C': {'B': 0.261, 'D': 0.311, 'F': 0.412},
+              'D': {'C': 0.311, 'E': 0.412},
+              'E': {'D': 0.412, 'F': 0.304, 'H': 0.523},
+              'F': {'C': 0.412, 'E': 0.304, 'G': 0.267},
+              'G': {'B': 0.418, 'F': 0.267, 'I': 0.515},
+              'H': {'E': 0.523, 'I': 0.587, 'J': 0.180},
+              'I': {'G': 0.515, 'H': 0.587, 'K': 0.190},
+              'J': {'H': 0.180, 'K': 0.580, 'I': 0.175},
+              'K': {'I': 0.190, 'J': 0.580, 'M': 0.166},
+              'L': {'J': 0.175, 'M': 0.591, 'N': 0.060},
+              'M': {'K': 0.166, 'L': 0.591, 'O': 0.060},
+              'N': {'L': 0.060, 'O': 0.585, 'P': 0.110},
+              'O': {'M': 0.060, 'N': 0.585, 'Q': 0.057},
+              'P': {'N': 0.110, 'Q': 0.585, 'R': 0.142},
+              'Q': {'O': 0.057, 'P': 0.585, 'S': 0.142},
+              'R': {'P': 0.142, 'S': 0.587, 'T': 0.154},
+              'S': {'Q': 0.142, 'R': 0.587, 'U': 0.141},
+              'T': {'R': 0.154, 'U': 0.587, 'V': 0.052},
+              'U': {'S': 0.141, 'T': 0.587, 'W': 0.065},
+              'V': {'T': 0.052, 'W': 0.574, 'X': 0.219},
+              'W': {'U': 0.065, 'V': 0.574, 'Y': 0.165},
+              'X': {'V': 0.219, 'Y': 0.580, 'CC': 0.924},
+              'Y': {'W': 0.165, 'X': 0.580},
+              'Z': {'H': 1.600, 'AA': 0.486, 'BB': 0.661},
+              'AA': {'Z': 0.486, 'BB': 0.439, 'FF': 0.500},
+              'BB': {'Z': 0.661, 'AA': 0.439, 'EE': 0.955},
+              'CC': {'X': 0.924, 'DD': 0.208},
+              'DD': {'CC': 0.208, 'EE': 0.671},
+              'EE': {'DD': 0.671, 'BB': 0.955, 'OO': 1.800},
+              'FF': {'AA': 0.500, 'GG': 0.369},
+              'GG': {'FF': 0.369, 'HH': 0.316},
+              'HH': {'GG': 0.316, 'II': 0.347},
+              'II': {'HH': 0.347, 'JJ': 0.181},
+              'JJ': {'II': 0.181, 'KK': 0.331},
+              'KK': {'JJ': 0.331, 'LL': 0.807},
+              'LL': {'KK': 0.807, 'MM': 0.312, 'RR': 0.867},
+              'MM': {'LL': 0.312, 'NN': 0.410},
+              'NN': {'MM': 0.410, 'OO': 1.200},
+              'OO': {'EE': 1.800, 'NN': 1.200, 'PP': 0.837},
+              'PP': {'OO': 0.837, 'QQ': 0.636},
+              'QQ': {'PP': 0.636, 'CCC': 0.593},
+              'RR': {'LL': 0.867, 'SS': 0.914, 'WW': 0.660},
+              'SS': {'RR': 0.914, 'TT': 1.000, 'VV': 0.562},
+              'TT': {'SS': 1.000, 'UU': 0.634},
+              'UU': {'TT': 0.634, 'VV': 1.300, 'XX': 0.172},
+              'VV': {'SS': 0.562, 'UU': 1.300, 'WW': 0.881, 'AAA': 0.874},
+              'WW': {'RR': 0.660, 'VV': 0.881, 'BBB': 0.849},
+              'XX': {'UU': 0.172, 'YY': 1.700, 'ZZ': 0.812},
+              'YY': {'XX': 1.700, 'GGG': 1.700},
+              'ZZ': {'XX': 0.812, 'AAA': 1.070, 'EEE': 1.060},
+              'AAA': {'VV': 0.874, 'ZZ': 1.070, 'BBB': 0.886},
+              'BBB': {'WW': 0.849, 'CCC': 0.548},
+              'CCC': {'QQ': 0.593, 'BBB': 0.548, 'DDD': 0.526},
+              'DDD': {'CCC': 0.526, 'EEE': 2.000},
+              'EEE': {'ZZ': 1.060, 'DDD': 2.000, 'FFF': 0.854},
+              'FFF': {'EEE': 0.854, 'GGG': 1.200},
+              'GGG': {'YY': 1.700, 'FFF': 1.200, 'HHH': 1.100},
+              'HHH': {'GGG': 1.100, 'III': 1.900},
+              'III': {'HHH': 1.900, 'JJJ': 0.207},
+              'JJJ': {'III': 0.207}
+        };
+
+        function findShortestPath() {
+            const startNode = document.forms['formDijkstra']['startNode'].value;
+            const endNode = document.forms['formDijkstra']['endNode'].value;
+
+            const dijkstra = new Dijkstra(input_simpul, input_graf);
+            const [parents, distances] = dijkstra.mencari_rute(startNode, endNode);
+            const jalur = Dijkstra.jalur_dilewati(parents, startNode, endNode);
+            const hasil = Dijkstra.cetak_jalur_dan_jarak(jalur, input_graf);
+
+            document.getElementById('hasilJalurDijkstra').value = hasil.join('\n');
         }
     </script>
 </body>
